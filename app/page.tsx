@@ -1,69 +1,95 @@
-import Image from "next/image";
+"use client";
+
+import { useMemo, useState } from "react";
+
+const example = "123 564 894 254 123 566";
+
+function Icon({ name }: { name: "spark" | "copy" | "whatsapp" | "arrow" | "check" }) {
+  if (name === "spark") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Zm7 13 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15ZM5 14l1 2.8L9 18l-3 1.2L5 22l-1-2.8L1 18l3-1.2L5 14Z" fill="currentColor"/></svg>;
+  if (name === "copy") return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"/></svg>;
+  if (name === "check") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>;
+  if (name === "arrow") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" stroke="none" d="M12 2a9.9 9.9 0 0 0-8.54 14.9L2 22l5.27-1.38A10 10 0 1 0 12 2Zm0 18a8 8 0 0 1-4.08-1.12l-.3-.18-3.13.82.84-3.05-.2-.32A8 8 0 1 1 12 20Zm4.4-5.98c-.24-.12-1.43-.71-1.65-.79-.22-.08-.38-.12-.54.12-.16.24-.62.79-.76.95-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.21-1.43-1.35-1.67-.14-.24-.01-.37.1-.49.11-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.47-.4-.4-.54-.41h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.31.98 2.47c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.47-.07 1.43-.59 1.63-1.16.2-.57.2-1.05.14-1.15-.06-.1-.22-.16-.46-.28Z"/></svg>;
+}
 
 export default function Home() {
+  const [input, setInput] = useState(example);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [phone, setPhone] = useState("8883670422");
+  const { unique, repeated, total } = useMemo(() => {
+    const values = input.trim().split(/[\s,;]+/).filter(Boolean);
+    const counts = new Map<string, number>();
+    values.forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
+    return {
+      unique: values.filter((value) => counts.get(value) === 1),
+      repeated: values.filter((value) => (counts.get(value) ?? 0) > 1),
+      total: values.length,
+    };
+  }, [input]);
+
+  async function copyList(which: "unique" | "repeated") {
+    const text = (which === "unique" ? unique : repeated).join(", ");
+    if (!text) return;
+    await navigator.clipboard.writeText(text);
+    setCopied(which);
+    window.setTimeout(() => setCopied(null), 1600);
+  }
+
+  function shareList(which: "unique" | "repeated") {
+    const values = which === "unique" ? unique : repeated;
+    if (!values.length) return;
+    const label = '';
+    const message = `${label}:\n${values.join(", ")}`;
+    const digits = phone.replace(/\D/g, "");
+    const url = `https://wa.me/${digits}${digits ? "?" : "?"}text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="page-shell">
+      <header className="topbar">
+        <a className="brand" href="#top" aria-label="Tally home"><span className="brand-mark"><Icon name="spark" /></span><span>tally<span className="brand-dot">.</span></span></a>
+        <div className="topbar-note"><span className="live-dot" /> Your numbers stay on this device</div>
+      </header>
+
+      <section className="hero" id="top">
+        <div className="eyebrow"><span className="eyebrow-line" /> THE LITTLE NUMBER ORGANIZER</div>
+        <h1>Make sense of<br />your <span>numbers.</span></h1>
+        <p className="hero-copy">Drop in your list. We’ll sort the one-timers from the repeats, ready to copy or send.</p>
+      </section>
+
+      <section className="workspace" aria-label="Number organizer">
+        <div className="input-card">
+          <div className="card-heading"><div><span className="step-label">01 <span>·</span> YOUR LIST</span><h2>Paste your numbers</h2></div><button className="text-button" onClick={() => setInput("")}>Clear all <span>↗</span></button></div>
+          <label className="sr-only" htmlFor="number-input">Enter numbers separated by spaces, commas, or new lines</label>
+          <textarea id="number-input" value={input} onChange={(event) => setInput(event.target.value)} placeholder="e.g. 123 564 894 254 123 566" spellCheck={false} />
+          <div className="input-footer"><span><span className="keyboard-icon">↵</span> Spaces, commas, or new lines all work</span><span className="input-count">{total} {total === 1 ? "number" : "numbers"}</span></div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="results-heading"><div><span className="step-label">02 <span>·</span> THE RESULTS</span><h2>Sorted, just like that<span>.</span></h2></div><span className="instant-badge"><Icon name="spark" /> Updates live</span></div>
+
+        <div className="results-grid">
+          <article className="result-card unique-card">
+            <div className="result-top"><div className="result-icon unique-icon">↗</div><div className="result-number">{unique.length.toString().padStart(2, "0")}</div></div>
+            <div className="result-title-row"><h3>One-time numbers</h3><span className="result-pill unique-pill">ONCE</span></div>
+            <p className="result-description">Only show up once in your list</p>
+            <div className="number-output" aria-live="polite">{unique.length ? unique.join(", ") : <span className="empty-state">Your one-timers will land here</span>}</div>
+            <div className="result-actions"><button className="copy-button" onClick={() => copyList("unique")} disabled={!unique.length}><Icon name={copied === "unique" ? "check" : "copy"} />{copied === "unique" ? "Copied" : "Copy list"}</button><button className="send-button" onClick={() => shareList("unique")} disabled={!unique.length}><Icon name="whatsapp" />Send on WhatsApp <Icon name="arrow" /></button></div>
+          </article>
+
+          <article className="result-card repeated-card">
+            <div className="result-top"><div className="result-icon repeated-icon">⟳</div><div className="result-number">{repeated.length.toString().padStart(2, "0")}</div></div>
+            <div className="result-title-row"><h3>Repeated numbers</h3><span className="result-pill repeated-pill">REPEATS</span></div>
+            <p className="result-description">Every appearance of a repeated number</p>
+            <div className="number-output" aria-live="polite">{repeated.length ? repeated.join(", ") : <span className="empty-state">No repeats found. Nice.</span>}</div>
+            <div className="result-actions"><button className="copy-button" onClick={() => copyList("repeated")} disabled={!repeated.length}><Icon name={copied === "repeated" ? "check" : "copy"} />{copied === "repeated" ? "Copied" : "Copy list"}</button><button className="send-button" onClick={() => shareList("repeated")} disabled={!repeated.length}><Icon name="whatsapp" />Send on WhatsApp <Icon name="arrow" /></button></div>
+          </article>
         </div>
-      </main>
-    </div>
+
+        <div className="share-note"><span className="note-icon">i</span><span>Send your pick straight to a WhatsApp chat. Add a phone number with country code if you want to open a specific chat.</span><label className="phone-field"><span>+91</span><input aria-label="Optional WhatsApp phone number" inputMode="tel" placeholder="Optional number" value={phone} onChange={(event) => setPhone(event.target.value)} /></label></div>
+      </section>
+
+      <footer className="footer"><span>Small tool. Big list energy.</span><span>MADE FOR THE MESSY MIDDLE OF YOUR NOTES</span></footer>
+    </main>
   );
 }
