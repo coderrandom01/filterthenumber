@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-const example = "123 564 894 254 123 566";
+const example = "";
 
 function Icon({ name }: { name: "spark" | "copy" | "whatsapp" | "arrow" | "check" }) {
   if (name === "spark") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Zm7 13 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15ZM5 14l1 2.8L9 18l-3 1.2L5 22l-1-2.8L1 18l3-1.2L5 14Z" fill="currentColor"/></svg>;
@@ -35,13 +35,18 @@ export default function Home() {
     window.setTimeout(() => setCopied(null), 1600);
   }
 
+  function handleNumberInput(value: string) {
+    setInput(value.replace(/[^\d\s,;]/g, ""));
+  }
+
   function shareList(which: "unique" | "repeated") {
     const values = which === "unique" ? unique : repeated;
     if (!values.length) return;
     const label = '';
     const message = `${label}:\n${values.join(", ")}`;
     const digits = phone.replace(/\D/g, "");
-    const url = `https://wa.me/${digits}${digits ? "?" : "?"}text=${encodeURIComponent(message)}`;
+    const whatsappNumber = digits.startsWith("91") ? digits : `91${digits}`;
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
@@ -62,7 +67,7 @@ export default function Home() {
         <div className="input-card">
           <div className="card-heading"><div><span className="step-label">01 <span>·</span> YOUR LIST</span><h2>Paste your numbers</h2></div><button className="text-button" onClick={() => setInput("")}>Clear all <span>↗</span></button></div>
           <label className="sr-only" htmlFor="number-input">Enter numbers separated by spaces, commas, or new lines</label>
-          <textarea id="number-input" value={input} onChange={(event) => setInput(event.target.value)} placeholder="e.g. 123 564 894 254 123 566" spellCheck={false} />
+          <textarea id="number-input" value={input} onChange={(event) => handleNumberInput(event.target.value)} placeholder="Enter numbers separated by spaces, commas, or new lines" spellCheck={false} inputMode="numeric" />
           <div className="input-footer"><span><span className="keyboard-icon">↵</span> Spaces, commas, or new lines all work</span><span className="input-count">{total} {total === 1 ? "number" : "numbers"}</span></div>
         </div>
 
@@ -86,7 +91,7 @@ export default function Home() {
           </article>
         </div>
 
-        <div className="share-note"><span className="note-icon">i</span><span>Send your pick straight to a WhatsApp chat. Add a phone number with country code if you want to open a specific chat.</span><label className="phone-field"><span>+91</span><input aria-label="Optional WhatsApp phone number" inputMode="tel" placeholder="Optional number" value={phone} onChange={(event) => setPhone(event.target.value)} /></label></div>
+        <div className="share-note"><span className="note-icon">i</span><span>Your list opens in a WhatsApp chat to +91 8883670422.</span><label className="phone-field"><span>+91</span><input aria-label="WhatsApp phone number" inputMode="tel" placeholder="Phone number" value={phone} onChange={(event) => setPhone(event.target.value.replace(/\D/g, ""))} /></label></div>
       </section>
 
       <footer className="footer"><span>Small tool. Big list energy.</span><span>MADE FOR THE MESSY MIDDLE OF YOUR NOTES</span></footer>
