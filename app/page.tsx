@@ -68,7 +68,7 @@ export default function Home() {
           <div className="card-heading"><div><span className="step-label">01 <span>·</span> YOUR LIST</span><h2>Paste your numbers</h2></div><button className="text-button" onClick={() => setInput("")}>Clear all <span>↗</span></button></div>
           <label className="sr-only" htmlFor="number-input">Enter numbers separated by spaces, commas, or new lines</label>
           <textarea id="number-input" value={input} onChange={(event) => handleNumberInput(event.target.value)} placeholder="Enter numbers separated by spaces, commas, or new lines" spellCheck={false} inputMode="text" autoCapitalize="off" autoCorrect="off" />
-          <div className="input-footer"><span><span className="keyboard-icon">↵</span> Spaces, commas, or new lines all work</span><span className="input-count">{total} {total === 1 ? "number" : "numbers"}</span></div>
+          <div className="input-footer"><span><span className="keyboard-icon">↵</span></span><span className="result-number">{total} {total === 1 ? "number" : "numbers"}</span></div>
         </div>
 
         <div className="results-heading"><div><span className="step-label">02 <span>·</span> THE RESULTS</span><h2>Sorted, just like that<span>.</span></h2></div><span className="instant-badge"><Icon name="spark" /> Updates live</span></div>
