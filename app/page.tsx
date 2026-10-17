@@ -42,12 +42,12 @@ export default function Home() {
   function shareList(which: "unique" | "repeated") {
     const values = which === "unique" ? unique : repeated;
     if (!values.length) return;
-    const label = '';
+    const label = which === "unique" ? "One-time numbers" : "Repeated numbers";
     const message = `${label}:\n${values.join(", ")}`;
     const digits = phone.replace(/\D/g, "");
     const whatsappNumber = digits.startsWith("91") ? digits : `91${digits}`;
     const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.location.assign(url);
   }
 
   return (
